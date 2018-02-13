@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QSystemTrayIcon>
+#include <QStandardItemModel>
 
 namespace Ui {
 class Dialog;
@@ -24,6 +25,8 @@ private:
     QAction* poCloseAppAction;
     QAction* poShowDialogAction;
     QAction* poHideDialogAction;
+
+    QStandardItemModel *oTableModel;
 
     void initSystemTray(void);
     void loadSerialPortList(void);

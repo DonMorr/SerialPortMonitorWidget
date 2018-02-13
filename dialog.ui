@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>271</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,14 +17,21 @@
    <property name="geometry">
     <rect>
      <x>9</x>
-     <y>49</y>
+     <y>9</y>
      <width>381</width>
-     <height>211</height>
+     <height>251</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QListView" name="comPortListIview"/>
+     <widget class="QTableView" name="comPortTableIview"/>
+    </item>
+    <item>
+     <widget class="QPushButton" name="refreshButton">
+      <property name="text">
+       <string>Refresh</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

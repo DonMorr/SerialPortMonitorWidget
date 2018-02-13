@@ -3,6 +3,7 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QSerialPortInfo>
+#include <QStandardItemModel>
 
 /*!
  * \brief Dialog::Dialog Constructor for creating our dialog.
@@ -18,7 +19,18 @@ Dialog::Dialog(QWidget *parent) :
 
     loadSerialPortList();
 
+    oTableModel = new QStandardItemModel(2,3,this); //2 Rows and 3 Columns
+    oTableModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
+    oTableModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Description")));
+    oTableModel->setHorizontalHeaderItem(2, new QStandardItem(QString("In Use?")));
 
+    ui->comPortTableIview->setModel(oTableModel);
+
+    // Stretch the table to fit the parent.
+    for (int c = 0; c < ui->comPortTableIview->horizontalHeader()->count(); ++c)
+    {
+        ui->comPortTableIview->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+    }
 }
 
 
@@ -29,14 +41,39 @@ void Dialog::loadSerialPortList(void)
     QList<QSerialPortInfo> aoPorts = QSerialPortInfo::availablePorts();
     QList<QSerialPortInfo>::iterator i;
 
-    for(i = aoPorts.begin(); i != aoPorts.end(); ++i)
+    if(aoPorts.length() == 0)
     {
-        if(i->portName().contains("tty.usbserial"))
+        qDebug("No Serial ports found...");
+    }
+    else
+    {
+        for(i = aoPorts.begin(); i != aoPorts.end(); ++i)
         {
-            qDebug("Serial Port: %s - %s - Is Busy? %s",
-                   i->portName().toUtf8().data(),
-                   i->description().toUtf8().data(),
-                   i->isBusy()?"yes":"No");
+#ifdef Q_WS_MACX
+            if(i->portName().contains("tty.usbserial"))
+#else
+            {
+#endif
+            }
+            {
+                qDebug("Serial Port: %s - %s - Is Busy? %s",
+                       i->portName().toUtf8().data(),
+                       i->description().toUtf8().data(),
+                       i->isBusy()?"yes":"No");
+
+                // Need to read up on QT Model/View
+                // http://doc.qt.io/qt-5/modelview.html
+
+                QStandardItem oRow(i->portName());
+                QList<QStandardItem*> oRowList;
+                oRowList.append(&oRow);
+                /*
+                oRowList << new QStandardItem(i->portName())
+                         << new QStandardItem(i->description())
+                         << new QStandardItem((i->isBusy()?"yes":"No"));
+                         */
+                oTableModel->appendRow(oRowList);
+            }
         }
     }
 
