@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QSerialPortInfo>
 #include <QStandardItemModel>
+#include <QStandardItem>
 
 /*!
  * \brief Dialog::Dialog Constructor for creating our dialog.
@@ -17,29 +18,44 @@ Dialog::Dialog(QWidget *parent) :
 
     initSystemTray();
 
+    initTableModel();
+
     loadSerialPortList();
+}
 
-    oTableModel = new QStandardItemModel(2,3,this); //2 Rows and 3 Columns
-    oTableModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
-    oTableModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Description")));
-    oTableModel->setHorizontalHeaderItem(2, new QStandardItem(QString("In Use?")));
-
-    ui->comPortTableIview->setModel(oTableModel);
-
-    // Stretch the table to fit the parent.
-    for (int c = 0; c < ui->comPortTableIview->horizontalHeader()->count(); ++c)
-    {
-        ui->comPortTableIview->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
-    }
+/*!
+ * \brief Dialog::refreshButtonPressed Handler called when the refresh button is pressed.
+ */
+void Dialog::refreshButtonPressed(void)
+{
+    qDebug("refreshButtonPressed");
+    loadSerialPortList();
 }
 
 
+/*!
+ * \brief Dialog::initTableModel Initialise the model for the main table view.
+ */
+void Dialog::initTableModel(void)
+{
+    oTableStandardItemModel = new QStandardItemModel(0,3,this); //2 Rows and 3 Columns
+    oTableStandardItemModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
+    oTableStandardItemModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Description")));
+    oTableStandardItemModel->setHorizontalHeaderItem(2, new QStandardItem(QString("In Use?")));
+    ui->comPortTableIview->setModel(oTableStandardItemModel);
+}
+
+
+/*!
+ * \brief Dialog::loadSerialPortList Search and save to the model the available serial ports.
+ */
 void Dialog::loadSerialPortList(void)
 {
-    //ui->comPortListIview;
-
     QList<QSerialPortInfo> aoPorts = QSerialPortInfo::availablePorts();
     QList<QSerialPortInfo>::iterator i;
+
+    // Clear the current model
+    oTableStandardItemModel->clear();
 
     if(aoPorts.length() == 0)
     {
@@ -49,34 +65,32 @@ void Dialog::loadSerialPortList(void)
     {
         for(i = aoPorts.begin(); i != aoPorts.end(); ++i)
         {
-#ifdef Q_WS_MACX
+#ifdef Q_OS_MACOS
             if(i->portName().contains("tty.usbserial"))
-#else
-            {
 #endif
-            }
             {
                 qDebug("Serial Port: %s - %s - Is Busy? %s",
                        i->portName().toUtf8().data(),
                        i->description().toUtf8().data(),
                        i->isBusy()?"yes":"No");
 
-                // Need to read up on QT Model/View
-                // http://doc.qt.io/qt-5/modelview.html
-
-                QStandardItem oRow(i->portName());
+                // Create a list of pointers to QStandardItems
                 QList<QStandardItem*> oRowList;
-                oRowList.append(&oRow);
-                /*
                 oRowList << new QStandardItem(i->portName())
                          << new QStandardItem(i->description())
                          << new QStandardItem((i->isBusy()?"yes":"No"));
-                         */
-                oTableModel->appendRow(oRowList);
+
+                // Now add the rowlist
+                oTableStandardItemModel->appendRow(oRowList);
             }
         }
     }
 
+    // Finally stretch the table to fit the parent.
+    for (int c = 0; c < ui->comPortTableIview->horizontalHeader()->count(); ++c)
+    {
+        ui->comPortTableIview->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+    }
 }
 
 

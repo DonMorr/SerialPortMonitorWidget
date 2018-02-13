@@ -17,6 +17,9 @@ public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
 
+public slots:
+    void refreshButtonPressed(void);
+
 private:
     Ui::Dialog *ui;
     QSystemTrayIcon* poSysTrayIcon;
@@ -26,14 +29,20 @@ private:
     QAction* poShowDialogAction;
     QAction* poHideDialogAction;
 
-    QStandardItemModel *oTableModel;
+    QStandardItemModel *oTableStandardItemModel;
 
     void initSystemTray(void);
     void loadSerialPortList(void);
+    void initTableModel(void);
 
     //overrides
     void hideEvent(QHideEvent *event);
     void showEvent(QShowEvent *event);
+
+
+
+
+
 };
 
 #endif // DIALOG_H
