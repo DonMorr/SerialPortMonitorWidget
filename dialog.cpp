@@ -38,11 +38,7 @@ void Dialog::refreshButtonPressed(void)
  */
 void Dialog::initTableModel(void)
 {
-    oTableStandardItemModel = new QStandardItemModel(0,3,this); //2 Rows and 3 Columns
-    oTableStandardItemModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
-    oTableStandardItemModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Description")));
-    oTableStandardItemModel->setHorizontalHeaderItem(2, new QStandardItem(QString("In Use?")));
-    ui->comPortTableIview->setModel(oTableStandardItemModel);
+    oTableStandardItemModel = new QStandardItemModel(1,3,this); //2 Rows and 3 Columns
 }
 
 
@@ -56,6 +52,18 @@ void Dialog::loadSerialPortList(void)
 
     // Clear the current model
     oTableStandardItemModel->clear();
+
+
+    oTableStandardItemModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
+    oTableStandardItemModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Description")));
+    oTableStandardItemModel->setHorizontalHeaderItem(2, new QStandardItem(QString("In Use?")));
+    ui->comPortTableIview->setModel(oTableStandardItemModel);
+
+    // Finally stretch the table to fit the parent.
+    for (int c = 0; c < ui->comPortTableIview->horizontalHeader()->count(); ++c)
+    {
+        ui->comPortTableIview->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+    }
 
     if(aoPorts.length() == 0)
     {
@@ -86,11 +94,7 @@ void Dialog::loadSerialPortList(void)
         }
     }
 
-    // Finally stretch the table to fit the parent.
-    for (int c = 0; c < ui->comPortTableIview->horizontalHeader()->count(); ++c)
-    {
-        ui->comPortTableIview->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
-    }
+
 }
 
 
