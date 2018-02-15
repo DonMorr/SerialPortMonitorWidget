@@ -5,6 +5,7 @@
 #include <QSerialPortInfo>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QMessageBox>
 
 /*!
  * \brief Dialog::Dialog Constructor for creating our dialog.
@@ -28,27 +29,25 @@ Dialog::Dialog(QWidget *parent) :
  */
 void Dialog::refreshButtonPressed(void)
 {
-    qDebug("refreshButtonPressed");
     loadSerialPortList();
 }
-
 
 /*!
  * \brief Dialog::initTableModel Initialise the model for the main table view.
  */
 void Dialog::initTableModel(void)
 {
-    oTableStandardItemModel = new QStandardItemModel(1,3,this); //2 Rows and 3 Columns
+    oTableStandardItemModel = new QStandardItemModel(1,3,this);
+    ui->comPortTableIview->setModel(oTableStandardItemModel);
 }
 
-
 /*!
- * \brief Dialog::loadSerialPortList Search and save to the model the available serial ports.
+ * \brief Dialog::loadSerialPortList Search and save to the table model any available serial ports.
  */
 void Dialog::loadSerialPortList(void)
 {
+    // Get a list of the available serial ports.
     QList<QSerialPortInfo> aoPorts = QSerialPortInfo::availablePorts();
-    QList<QSerialPortInfo>::iterator i;
 
     // Clear the current model
     oTableStandardItemModel->clear();
@@ -57,7 +56,7 @@ void Dialog::loadSerialPortList(void)
     oTableStandardItemModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Name")));
     oTableStandardItemModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Description")));
     oTableStandardItemModel->setHorizontalHeaderItem(2, new QStandardItem(QString("In Use?")));
-    ui->comPortTableIview->setModel(oTableStandardItemModel);
+
 
     // Finally stretch the table to fit the parent.
     for (int c = 0; c < ui->comPortTableIview->horizontalHeader()->count(); ++c)
@@ -65,12 +64,11 @@ void Dialog::loadSerialPortList(void)
         ui->comPortTableIview->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
     }
 
-    if(aoPorts.length() == 0)
+    // If there are any serial ports, add them to the model.
+    if(aoPorts.length() > 0)
     {
-        qDebug("No Serial ports found...");
-    }
-    else
-    {
+        // Now iterate through the list and add the items through the model.
+        QList<QSerialPortInfo>::iterator i;
         for(i = aoPorts.begin(); i != aoPorts.end(); ++i)
         {
 #ifdef Q_OS_MACOS
@@ -84,19 +82,26 @@ void Dialog::loadSerialPortList(void)
 
                 // Create a list of pointers to QStandardItems
                 QList<QStandardItem*> oRowList;
-                oRowList << new QStandardItem(i->portName())
-                         << new QStandardItem(i->description())
-                         << new QStandardItem((i->isBusy()?"yes":"No"));
+                QStandardItem* poRowItem = new QStandardItem(i->portName());
+                poRowItem->setEditable(false);
+                oRowList << poRowItem;
+                poRowItem = new QStandardItem(i->description());
+                poRowItem->setEditable(false);
+                oRowList << poRowItem;
+                poRowItem = new QStandardItem((i->isBusy()?"yes":"No"));
+                poRowItem->setEditable(false);
+                oRowList << poRowItem;
 
                 // Now add the rowlist
                 oTableStandardItemModel->appendRow(oRowList);
             }
         }
     }
-
-
+    else
+    {
+        qDebug("No Serial ports found...");
+    }
 }
-
 
 /*!
  * \brief Dialog::initSystemTray initialise the system tray.
@@ -105,10 +110,7 @@ void Dialog::initSystemTray(void)
 {
     if(QSystemTrayIcon::isSystemTrayAvailable())
     {
-        qDebug("System Tray Available!");
-
-
-        //! Assemble the contect menu actions
+        // Assemble the contect menu actions
         this->poShowDialogAction = new QAction(tr("&Show"), this);
         connect(this->poShowDialogAction, SIGNAL(triggered(bool)), this, SLOT(show()));
         this->poShowDialogAction->setVisible(false);
@@ -116,26 +118,36 @@ void Dialog::initSystemTray(void)
         this->poHideDialogAction = new QAction(tr("&Hide"), this);
         connect(this->poHideDialogAction, SIGNAL(triggered(bool)), this, SLOT(hide()));
 
+        this->poRefreshDialogAction = new QAction(tr("&Refresh"), this);
+        connect(this->poRefreshDialogAction, SIGNAL(triggered(bool)), this, SLOT(refreshButtonPressed()));
+
         this->poCloseAppAction = new QAction(tr("&Quit"), this);
         connect(this->poCloseAppAction, SIGNAL(triggered(bool)), this, SLOT(accept(void)));
 
-        //! Assemble the context menu
+        // Assemble the context menu
         this->poSysTrayContextMenu = new QMenu(this);
         this->poSysTrayContextMenu->addAction(poShowDialogAction);
         this->poSysTrayContextMenu->addAction(poHideDialogAction);
+        this->poSysTrayContextMenu->addAction(poRefreshDialogAction);
         this->poSysTrayContextMenu->addSeparator();
         this->poSysTrayContextMenu->addAction(this->poCloseAppAction);
 
-        //! Create the system tray icon
+        // Create the system tray icon
         this->poSysTrayIcon = new QSystemTrayIcon(this);
         this->poSysTrayIcon->setContextMenu(this->poSysTrayContextMenu);
 
-        this->poSysTrayIcon->setIcon(QIcon(":/icons/724094.png"));
+        // Connect the click events so we can open the dialog when the tray icon is pressed.
+        connect(this->poSysTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+
+        this->poSysTrayIcon->setIcon(QIcon(":/icons/settings.svg"));
         this->poSysTrayIcon->show();
     }
     else
     {
-        qDebug("System Tray Unavailable!");
+        QMessageBox msgBox;
+        msgBox.setText("System Tray Unavailable!");
+        msgBox.exec();
     }
 }
 
@@ -159,6 +171,24 @@ void Dialog::showEvent(QShowEvent *event)
     (void) event;
     this->poShowDialogAction->setVisible(false);
     this->poHideDialogAction->setVisible(true);
+}
+
+/*!
+ * \brief Dialog::iconActivated Hanles when the system tray icon has been clicked on.
+ * \param reason
+ */
+void Dialog::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+    case QSystemTrayIcon::DoubleClick:
+        this->show();
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        break;
+    default:
+        ;
+    }
 }
 
 Dialog::~Dialog()
