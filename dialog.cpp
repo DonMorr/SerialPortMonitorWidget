@@ -171,6 +171,8 @@ void Dialog::showEvent(QShowEvent *event)
     (void) event;
     this->poShowDialogAction->setVisible(false);
     this->poHideDialogAction->setVisible(true);
+    // Refresh the list when we are shown.
+    loadSerialPortList();
 }
 
 /*!
