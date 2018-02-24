@@ -38,3 +38,13 @@ FORMS += \
 
 RESOURCES += \
     icons_resource.qrc
+
+DISTFILES += \
+    Deployment.txt
+
+GIT_VERSION = $$system(git --git-dir $$PWD/.git --work-tree $$PWD describe --always --tags)
+
+DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\"
+
+DEFINES += APP_VERSION=\\\"1.0.0\\\"
+

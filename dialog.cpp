@@ -33,6 +33,19 @@ void Dialog::refreshButtonPressed(void)
 }
 
 /*!
+ * \brief Dialog::about Displays an about Message Box.
+ */
+void Dialog::about(void)
+{
+    /*
+    QMessageBox msgBox;
+    msgBox.setText(QString("Serial Port Monitor Widget v%1 (%2)\n https://github.com/DonMorr/SerialPortMonitorWidget").arg(APP_VERSION).arg(GIT_VERSION));
+    msgBox.exec();
+    */
+    QMessageBox::information(0, "About", QString("Serial Port Monitor Widget v%1 (%2)\nSee the project on GitHub: \nhttps://github.com/DonMorr/SerialPortMonitorWidget").arg(APP_VERSION).arg(GIT_VERSION));
+}
+
+/*!
  * \brief Dialog::initTableModel Initialise the model for the main table view.
  */
 void Dialog::initTableModel(void)
@@ -110,7 +123,7 @@ void Dialog::initSystemTray(void)
 {
     if(QSystemTrayIcon::isSystemTrayAvailable())
     {
-        // Assemble the contect menu actions
+        // Assemble the contect m      enu actions
         this->poShowDialogAction = new QAction(tr("&Show"), this);
         connect(this->poShowDialogAction, SIGNAL(triggered(bool)), this, SLOT(show()));
         this->poShowDialogAction->setVisible(false);
@@ -124,13 +137,18 @@ void Dialog::initSystemTray(void)
         this->poCloseAppAction = new QAction(tr("&Quit"), this);
         connect(this->poCloseAppAction, SIGNAL(triggered(bool)), this, SLOT(accept(void)));
 
+        this->poAboutAction = new QAction(tr("&About"), this);
+        connect(this->poAboutAction, SIGNAL(triggered(bool)), this, SLOT(about(void)));
+
         // Assemble the context menu
         this->poSysTrayContextMenu = new QMenu(this);
         this->poSysTrayContextMenu->addAction(poShowDialogAction);
         this->poSysTrayContextMenu->addAction(poHideDialogAction);
         this->poSysTrayContextMenu->addAction(poRefreshDialogAction);
         this->poSysTrayContextMenu->addSeparator();
+        this->poSysTrayContextMenu->addAction(poAboutAction);
         this->poSysTrayContextMenu->addAction(this->poCloseAppAction);
+
 
         // Create the system tray icon
         this->poSysTrayIcon = new QSystemTrayIcon(this);

@@ -19,6 +19,7 @@ public:
 
 public slots:
     void refreshButtonPressed(void);
+    void about(void);
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
@@ -32,6 +33,7 @@ private:
     QAction* poShowDialogAction;
     QAction* poHideDialogAction;
     QAction* poRefreshDialogAction;
+    QAction* poAboutAction;
 
     QStandardItemModel *oTableStandardItemModel;
 

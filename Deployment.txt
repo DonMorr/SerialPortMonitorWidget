@@ -1,0 +1,15 @@
+
+
+Build from Command Line:
+------------------------
+//Open terminal in project window
+make clean
+qmake -config release
+make
+
+
+Instructions to create a MacOS Bundle:
+--------------------------------------
+// Once build is complete (either using commmand line or QT Creator), go to build directory and run these:
+macdeployqt SerialPortMonitor.app
+install_name_tool -add_rpath "@executable_path/../Frameworks" SerialPortMonitor.app/Contents/MacOS/SerialPortMonitor
