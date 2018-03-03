@@ -5,6 +5,7 @@ A Simple System Tray Icon widget for listing the serial ports connected to the c
 
 Tested on Windows 10 and MacOS High Sierra
 
+![Alt text](images/v1.0_mac.png?raw=true "MacOsx Screenshot")
 
 Instructions to create a MacOS Bundle:
 --------------------------------------
