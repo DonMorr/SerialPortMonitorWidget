@@ -4,8 +4,11 @@ Cross Platform Serial Port Monitor Widget
 A Simple System Tray Icon widget for listing the serial ports connected to the computer.
 
 Tested on Windows 10 and MacOS High Sierra
+![Alt text](images/vv1.0_taskbar.png?raw=true "MacOsx Screenshot of taskbar")
 
-![Alt text](images/v1.0_mac.png?raw=true "MacOsx Screenshot")
+![Alt text](images/v1.0_mac.png?raw=true "MacOsx Screenshot of widget window")
+
+
 
 Instructions to create a MacOS Bundle:
 --------------------------------------
